@@ -54,7 +54,7 @@ var dbDialect = flag.String("db-dialect", "sqlite3", "Database dialect (sqlite3 
 var dbAddress = flag.String("db-address", "file:ozip.db?_foreign_keys=on", "Database address")
 var requestFullSync = flag.Bool("request-full-sync", false, "Request full (1 year) history sync when logging in?")
 
-const redisAddr = "127.0.0.1:6379"
+
 
 func XhandleRequest(w http.ResponseWriter, r *http.Request) {
 
