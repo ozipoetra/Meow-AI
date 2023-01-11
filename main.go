@@ -785,11 +785,11 @@ func handler(rawEvt interface{}) {
           requ := gogpt.CompletionRequest{
       		Model: "text-davinci-003",
       		MaxTokens: 512,
-      		Temperature: 0.8,
+      		Temperature: 0.9,
       		Prompt: string("You: "+messageBody+"\nFriend: "),
-      		TopP: 0.4,
-      		FrequencyPenalty: 0.6,
-      		PresencePenalty: 0.3,
+      		TopP: 0.3,
+      		FrequencyPenalty: 0.8,
+      		PresencePenalty: 0.0,
       		Stop: []string{"You:"},
       	}
       	
@@ -807,11 +807,11 @@ func handler(rawEvt interface{}) {
         reqi := gogpt.CompletionRequest{
       		Model: "text-davinci-003",
       		MaxTokens: 512,
-      		Temperature: 0.8,
+      		Temperature: 0.9,
       		Prompt: string("Friend: "+evt.Message.GetExtendedTextMessage().GetContextInfo().GetQuotedMessage().GetConversation()+"\nYou: "+evt.Message.GetExtendedTextMessage().GetText()+"\nFriend: "),
-      		TopP: 0.4,
-      		FrequencyPenalty: 0.6,
-      		PresencePenalty: 0.3,
+      		TopP: 0.3,
+      		FrequencyPenalty: 0.8,
+      		PresencePenalty: 0.0,
       		Stop: []string{"You:"},
       	}
       	
