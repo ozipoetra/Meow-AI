@@ -25,6 +25,7 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
+	"sync"
 
 	_ "github.com/mattn/go-sqlite3"
 	//"github.com/mdp/qrterminal/v3"
@@ -47,6 +48,7 @@ import (
 
 var cli *whatsmeow.Client
 var log waLog.Logger
+var wg sync.WaitGroup
 
 var logLevel = "INFO"
 var debugLogs = flag.Bool("debug", false, "Enable debug logs?")
@@ -779,22 +781,21 @@ func handler(rawEvt interface{}) {
 			}else if messageBodys == "meow"{
 			 cli.SendMessage(context.Background(), evt.Info.Chat, cli.BuildPollCreation("Apakah kalian suka meow?", []string{"Suka", "Tidak Suka"}, 1)) 
 			}else{
+			    
           requ := gogpt.CompletionRequest{
       		Model: "text-davinci-003",
       		MaxTokens: 512,
-      		Temperature: 0.9,
+      		Temperature: 0.8,
       		Prompt: string("You: "+messageBody+"\nFriend: "),
-      		TopP: 0.3,
-      		FrequencyPenalty: 0.9,
-      		PresencePenalty: 0.2,
-      		Stop: []string{"You:","Friend:"},
+      		TopP: 0.4,
+      		FrequencyPenalty: 0.6,
+      		PresencePenalty: 0.3,
+      		Stop: []string{"You:"},
       	}
       	
       	respu, err := cgpt.CreateCompletion(ctxx, requ)
-      	if err == nil {
-      		go cgpt.CreateCompletion(ctxx, requ)
-      	}else{
-      	  return
+      	if err != nil {
+      		log.Errorf("CGPT Error",err)
       	}
       	
 			  cli.SendMessage(context.Background(), evt.Info.Chat, &waProto.Message{
@@ -802,23 +803,23 @@ func handler(rawEvt interface{}) {
 				})
 			}
 		}else if (!evt.Info.IsFromMe && !evt.Info.IsGroup && evt.Info.MediaType == "" && evt.Message.GetExtendedTextMessage().GetText() != ""){
-
+        
         reqi := gogpt.CompletionRequest{
       		Model: "text-davinci-003",
       		MaxTokens: 512,
-      		Temperature: 0.9,
+      		Temperature: 0.8,
       		Prompt: string("Friend: "+evt.Message.GetExtendedTextMessage().GetContextInfo().GetQuotedMessage().GetConversation()+"\nYou: "+evt.Message.GetExtendedTextMessage().GetText()+"\nFriend: "),
-      		TopP: 0.3,
-      		FrequencyPenalty: 0.9,
-      		PresencePenalty: 0.2,
-      		Stop: []string{"You:","Friend:"},
+      		TopP: 0.4,
+      		FrequencyPenalty: 0.6,
+      		PresencePenalty: 0.3,
+      		Stop: []string{"You:"},
       	}
+      	
       	respi, err := cgpt.CreateCompletion(ctxx, reqi)
-      	if err == nil {
-      		go cgpt.CreateCompletion(ctxx, reqi)
-      	}else{
-      	  return
+      	if err != nil {
+      		log.Errorf("CGPT Error")
       	}
+      	
 		  //fmt.Println("Received a quote message!",evt.Info.Sender.User,"|",evt.Message.GetExtendedTextMessage().GetText(),"|", evt.Message.GetExtendedTextMessage().GetContextInfo().GetQuotedMessage().GetConversation())
 		  if (rkotor == true){
 				go cli.SendMessage(context.Background(), evt.Info.Chat, &waProto.Message{
@@ -885,6 +886,8 @@ func handler(rawEvt interface{}) {
 		  outd, err := cmd.Output()
       if err != nil {
         fmt.Println("could not run command: ", err)
+      }else{
+        go cmd.Output()
       }
      //mssg1 := ("Total RAM: ",memory.Total)
 		  cli.SendMessage(context.Background(), evt.Info.Chat, &waProto.Message{
@@ -903,6 +906,7 @@ func handler(rawEvt interface{}) {
       if err != nil {
         fmt.Println("could not run command: ", err)
       }
+		  
      //mssg1 := ("Total RAM: ",memory.Total)
 		  cli.SendMessage(context.Background(), evt.Info.Chat, &waProto.Message{
 				ExtendedTextMessage: &waProto.ExtendedTextMessage{
