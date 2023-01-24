@@ -15,7 +15,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	//"mime"
+	"mime"
 	"net/http"
 	"os"
 	"os/signal"
