@@ -711,7 +711,7 @@ func handler(rawEvt interface{}) {
     cgpt := gogpt.NewClient(apiKey)
     
     // custome respone message
-    ttd := ("")
+    ttd := ("\n\n-*AI Bot*")
     mktr1 := ("Tidak ramah, ⭐ 1 ."+ttd)
 		mozip1 := ("Halo bang 🙂."+ttd)
 		mhalo1 := ("Halo disana, aku adalah bot pintar yang siap menjawab pertanyaan kamu apa saja. Harap gunakan bahasa Indonesia yang baik dan benar. Saya juga bisa bahasa nasional negara lain lho seperti: Inggris, Jepang, China Mandarin, Jerman dan lainnya.\n\n *Pro TIP:* Gunakan quoted message saat membalas pesan agar bot dapat nyambung dalam obrolanmu."+ttd)
