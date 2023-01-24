@@ -921,7 +921,67 @@ func handler(rawEvt interface{}) {
 		}
 		}
     
+        case *events.Message:
+		metaParts := []string{fmt.Sprintf("pushname: %s", evt.Info.PushName), fmt.Sprintf("timestamp: %s", evt.Info.Timestamp)}
+		if evt.Info.Type != "" {
+			metaParts = append(metaParts, fmt.Sprintf("type: %s", evt.Info.Type))
+		}
+		if evt.Info.Category != "" {
+			metaParts = append(metaParts, fmt.Sprintf("category: %s", evt.Info.Category))
+		}
+		if evt.IsViewOnce {
+			metaParts = append(metaParts, "view once")
+		}
+		if evt.IsViewOnce {
+			metaParts = append(metaParts, "ephemeral")
+		}
+		if evt.IsViewOnceV2 {
+			metaParts = append(metaParts, "ephemeral (v2)")
+		}
+		if evt.IsDocumentWithCaption {
+			metaParts = append(metaParts, "document with caption")
+		}
+		if evt.IsEdit {
+			metaParts = append(metaParts, "edit")
+		}
 
+		log.Infof("Received message %s from %s (%s): %+v", evt.Info.ID, evt.Info.SourceString(), strings.Join(metaParts, ", "), evt.Message)
+
+		if evt.Message.GetPollUpdateMessage() != nil {
+			decrypted, err := cli.DecryptPollVote(evt)
+			if err != nil {
+				log.Errorf("Failed to decrypt vote: %v", err)
+			} else {
+				log.Infof("Selected options in decrypted vote:")
+				for _, option := range decrypted.SelectedOptions {
+					log.Infof("- %X", option)
+				}
+			}
+		} else if evt.Message.GetEncReactionMessage() != nil {
+			decrypted, err := cli.DecryptReaction(evt)
+			if err != nil {
+				log.Errorf("Failed to decrypt encrypted reaction: %v", err)
+			} else {
+				log.Infof("Decrypted reaction: %+v", decrypted)
+			}
+		}
+
+		img := evt.Message.GetImageMessage()
+		if img != nil {
+			data, err := cli.Download(img)
+			if err != nil {
+				log.Errorf("Failed to download image: %v", err)
+				return
+			}
+			exts, _ := mime.ExtensionsByType(img.GetMimetype())
+			path := fmt.Sprintf("%s%s", evt.Info.ID, exts[0])
+			err = os.WriteFile(path, data, 0600)
+			if err != nil {
+				log.Errorf("Failed to save image: %v", err)
+				return
+			}
+			log.Infof("Saved image in message to %s", path)
+		}
 	case *events.HistorySync:
 		id := atomic.AddInt32(&historySyncID, 1)
 		fileName := fmt.Sprintf("history-%d-%d.json", startupTime, id)
