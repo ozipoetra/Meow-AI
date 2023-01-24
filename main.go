@@ -920,8 +920,7 @@ func handler(rawEvt interface{}) {
 			})
 		}
 		}
-    
-  case *events.Message:
+  
 		metaParts := []string{fmt.Sprintf("pushname: %s", evt.Info.PushName), fmt.Sprintf("timestamp: %s", evt.Info.Timestamp)}
 		if evt.Info.Type != "" {
 			metaParts = append(metaParts, fmt.Sprintf("type: %s", evt.Info.Type))
